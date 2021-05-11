@@ -12,7 +12,7 @@ the raw data and create the full datasets to be used for training. Syncing the g
 ### 3. Configure model/open main.py
 
 
-To configure the input modalities, model architecture, training/optimization and evaluation there are four clearly maked sections at the begining of the scrpit to do so.
+To configure the input modalities, model architecture, training/optimization and evaluation there are four clearly maked sections at the begining of the script to do so.
 
 #### Configure data structure
 This is the most impactful section as it controls the input shapes and modalities which greatly effects the model configuration. It has the following boolean options:
