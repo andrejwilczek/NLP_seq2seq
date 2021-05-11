@@ -140,9 +140,7 @@ decoder_optimizer = optim.Adam(
     decoder.parameters(), lr=learning_rate * decoder_learning_ratio)
 
 
-#################################
 # Training
-#################################
 if train_model:
     print("--- Starting Training --- \n")
     training_loss, validation_loss, avg_train_loss, avg_valid_loss = trainIters(voc, train_dataloader, valid_dataloader, encoder, decoder, encoder_optimizer, decoder_optimizer,
@@ -165,9 +163,8 @@ else:
 if plot_embeddings:
     tsne_plot(voc, embedding, hidden_size)
 
-#################################
+
 # Evaluation
-#################################
 # Set dropout layers to eval mode
 encoder.eval()
 decoder.eval()
