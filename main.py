@@ -27,35 +27,32 @@ use_game_state = False
 use_delta_time = False
 game_only = False
 
-
 #################################
 #! Configure models
 #################################
-hidden_size = 50
+hidden_size = 128
 encoder_n_layers = 1
 decoder_n_layers = 1
 dropout = 0
 batch_size = 10
-load_embeddings = False      # Pretrained embeddings from GLoVe
-bi_directional = True       # Bi-directional encoder
-
+load_embeddings = False
+bi_directional = True
 
 #################################
 #! Configure training/optimization
 #################################
-train_model = True
 clip = 5.0
-teacher_forcing_ratio = 0
 learning_rate = 0.001
 decoder_learning_ratio = 1.0
-n_iteration = 1
+n_epochs = 10
 use_teacher_decay = False
+teacher_forcing_ratio = 0
 
 #################################
 #! Configure Evaluation
 #################################
 evaluate_on_test = True
-n_eval = 40            # Number of test samples to evaluate
+n_eval = 10
 evaluate_specific = True
 plot_embeddings = False
 
@@ -69,7 +66,7 @@ plot_embeddings = False
 # Save model inputs and hyperparameters
 # config = wandb.config
 # config.learning_rate = learning_rate
-# config.n_iteration = n_iteration
+# config.n_epochs = n_epochs
 # config.clip = clip
 # config.teacher_forcing_ratio = teacher_forcing_ratio
 # config.batch_size = batch_size
@@ -141,23 +138,22 @@ decoder_optimizer = optim.Adam(
 
 
 # Training
-if train_model:
-    print("--- Starting Training --- \n")
-    training_loss, validation_loss, avg_train_loss, avg_valid_loss = trainIters(voc, train_dataloader, valid_dataloader, encoder, decoder, encoder_optimizer, decoder_optimizer,
-                                                                                encoder_n_layers, decoder_n_layers,  n_iteration, batch_size, clip, use_teacher_decay, teacher_forcing_ratio)
-else:
-    checkpoint = torch.load(
-        'Text+Game no history/checkpoint epoch_10.zip', map_location=torch.device('cpu'))
-    encoder.load_state_dict(checkpoint['encoder_state_dict'])
-    decoder.load_state_dict(checkpoint['decoder_state_dict'])
+print("--- Starting Training --- \n")
+training_loss, validation_loss, avg_train_loss, avg_valid_loss = trainIters(voc, train_dataloader, valid_dataloader, encoder, decoder, encoder_optimizer, decoder_optimizer,
+                                                                            encoder_n_layers, decoder_n_layers,  n_epochs, batch_size, clip, use_teacher_decay, teacher_forcing_ratio)
 
-    encoder_optimizer.load_state_dict(
-        checkpoint['encoder_optimizer_state_dict'])
-    decoder_optimizer.load_state_dict(
-        checkpoint['decoder_optimizer_state_dict'])
-    epoch = checkpoint['epoch']
-    loss = checkpoint['loss']
-    print(f'Loading epoch {epoch} with loss {loss}')
+# checkpoint = torch.load(
+#     'Text+Game no history/checkpoint epoch_10.zip', map_location=torch.device('cpu'))
+# encoder.load_state_dict(checkpoint['encoder_state_dict'])
+# decoder.load_state_dict(checkpoint['decoder_state_dict'])
+
+# encoder_optimizer.load_state_dict(
+#     checkpoint['encoder_optimizer_state_dict'])
+# decoder_optimizer.load_state_dict(
+#     checkpoint['decoder_optimizer_state_dict'])
+# epoch = checkpoint['epoch']
+# loss = checkpoint['loss']
+# print(f'Loading epoch {epoch} with loss {loss}')
 
 
 if plot_embeddings:
