@@ -36,13 +36,24 @@ If you only want to have the gamestate as input set game_only to True (This will
 #### Configure models
 The next section is about the models and includes the following options:
 
-- hidden_size = 50
-- encoder_n_layers = 1
-- decoder_n_layers = 1
-- dropout = 0
-- batch_size = 10
-- load_embeddings = False     
-- bi_directional = True 
+- hidden_size: hidden dimension of both dialogue and gamestate GRU in encoder/decoder
+- encoder_n_layers: number of layers for both dialogue and gamestate GRU in encoder 
+- decoder_n_layers:  number of layers in decoder GRU
+- dropout: dropout in all GRU-units (if n_layers = 1 dropout defaults to 0)
+- batch_size: size of training batches
+- load_embeddings: Loads embeding weights from GLoVe if True    
+- bi_directional: Sets dialogue GRU in encoder to bidirectional if True  
 
 #### Configure training/optimization
+- clip: Gradient clipping threshold
+- teacher_forcing_ratio: Probability of using teacher forcing at any given time [0,1]
+- learning_rate: The learning rate used during optimization.
+- decoder_learning_ratio: A factor placed on the learning rate of the decoders learning rate, encoder/decoder has same lr if this is 1. 
+- n_epochs: Number of epoch to train
+- use_teacher_decay: Uses linear decay for teacher forcing if True, default setting is 1 to 0 over 70% of the epochs. You can find the function teacher_decay in utils.py to change this. 
+
 #### Configure Evaluation
+- evaluate_on_test: Randomly evaluates on a given amount of samples from the test set. 
+- n_eval: Number of test samples to evaluate
+- evaluate_specific: Evaluates on specific samples of snakes, ladders and wins if True.
+- plot_embeddings: Plots the tsne figures of the word embeddings for the 100 most frequent words if True. Also gives the 3 closest neighbours to snake and ladder.
