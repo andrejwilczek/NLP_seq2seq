@@ -16,6 +16,9 @@ the raw data and create the full datasets to be used for training. Syncing the g
 
 To configure the input modalities, model architecture, training/optimization and evaluation there are four clearly maked sections at the begining of the script to do so.
 
+![config_model](https://user-images.githubusercontent.com/55242743/117888668-b1181380-b2b2-11eb-8c4d-466dfdeed459.png)
+
+
 #### Configure data structure
 This is the most impactful section as it controls the input shapes and modalities which greatly effects the model configuration. It has the following boolean options:
 
