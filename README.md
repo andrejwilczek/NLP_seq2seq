@@ -9,8 +9,10 @@
 Since the complete dataset is too large to upload to github this will parse		
 the raw data and create the full datasets to be used for training. Syncing the gamestate data may take a little while. 
 
-### 3. Configure model/open main.py
+#### If you want to you should now already be able to run the model in it's simplest form by running main.py. 
 
+
+### 3. Configure model - main.py
 
 To configure the input modalities, model architecture, training/optimization and evaluation there are four clearly maked sections at the begining of the script to do so.
 
