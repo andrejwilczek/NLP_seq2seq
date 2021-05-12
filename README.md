@@ -6,7 +6,7 @@
 
 ### 2. run parse_raw_data.py
 
-Since the complete dataset is too large to upload to github this will parse		
+Since the complete dataset is too large to upload to github as one file this will parse		
 the raw data and create the full datasets to be used for training. Syncing the gamestate data may take a little while. 
 
 #### If you want to you should now already be able to run the model in it's simplest form by running main.py. 
@@ -16,26 +16,16 @@ the raw data and create the full datasets to be used for training. Syncing the g
 
 To configure the input modalities, model architecture, training/optimization and evaluation there are four clearly maked sections at the begining of the script to do so.
 
-![config_model](https://user-images.githubusercontent.com/55242743/117888668-b1181380-b2b2-11eb-8c4d-466dfdeed459.png)
+![config_model](https://user-images.githubusercontent.com/55242743/117950460-7eeace00-b313-11eb-9f2b-9dda3ff338af.png)
 
 
 #### Configure data structure
-This is the most impactful section as it controls the input shapes and modalities which greatly effects the model configuration. It has the following boolean options:
+This section controls the input shapes and modalities which greatly effects the model configuration. It has the following boolean options:
 
-- use_dialogue_history
-- use_game_state 
-- use_delta_time 
-- game_only 
-
-If all are set to False the network will only use dialogue data and only use the previous utterance as input to predict the next one.
-
-To include more dialogue history (three last utterances) in the input set use_dialogue_history to True.
-
-To include the gamestate data set use_game_state to True. 
-
-To include the time between the input utterances and the target set use_delta_time to True. 
-
-If you only want to have the gamestate as input set game_only to True (This will automatically set use_dialogue_history and use_delta_time to False and set use_game_state to True).
+- use_dialogue_history: dialogue input is 3 utterances if True otherwise 1.
+- use_game_state: includes gamestate dataset and GRu if True
+- use_delta_time: includes the time between the input utterances and the target if True
+- game_only: includes only gamestate data in model if True, this overrides the other options if set to True
 
 
 #### Configure models
@@ -65,4 +55,15 @@ The next section is about the models and includes the following options:
 
 
 ### 4. Run main.py
+
+## Structure of repo
+Here is an overview of the contents of the scripts and their functions
+
+#### main.py 
+High level comands 
+
+
+
+
+
 
