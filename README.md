@@ -61,7 +61,7 @@ Here is an overview of the contents of the scripts and their functions
 
 #### main.py 
 High level comands, such as training and evaluation. 
-Configure model andinput data. 
+Configure model and input data. 
 
 #### encoder_decoder.py
 Seq2seq model contains encoder/decoder class, greedysearchdecoder, train, validation and evaluation functions 
