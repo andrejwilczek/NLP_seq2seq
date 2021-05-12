@@ -12,7 +12,9 @@ the raw data and create the full datasets to be used for training. Syncing the g
 #### If you want to you should now already be able to run the model in it's simplest form by running main.py. 
 
 
-### 3. Configure model - main.py
+### 3. Install requirements.txt
+
+### 4. Configure model - main.py
 
 To configure the input modalities, model architecture, training/optimization and evaluation there are four clearly maked sections at the begining of the script to do so.
 
@@ -54,7 +56,7 @@ The next section is about the models and includes the following options:
 - plot_embeddings: Plots the tsne figures of the word embeddings for the 100 most frequent words if True. Also gives the 3 closest neighbours to snake and ladder.
 
 
-### 4. Run main.py
+### 5. Run main.py
 
 ## Structure of repo
 Here is an overview of the contents of the scripts and their functions
