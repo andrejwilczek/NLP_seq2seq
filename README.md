@@ -60,10 +60,16 @@ The next section is about the models and includes the following options:
 Here is an overview of the contents of the scripts and their functions
 
 #### main.py 
-High level comands 
+High level comands, such as training and evaluation. 
+Configure model andinput data. 
 
+#### encoder_decoder.py
+Seq2seq model contains encoder/decoder class, greedysearchdecoder, train, validation and evaluation functions 
 
+#### vocab.py
+Contains the vocabulary class
 
-
+#### utils.py
+Contains utility functions for: padding, masking, createing tensor dataset from batch of samples, plotting tsne figures, teacher decay. 
 
 
