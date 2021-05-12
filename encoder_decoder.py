@@ -25,7 +25,7 @@ UNK_token = 6  # Out of vocabulary token
 
 
 class EncoderRNN(nn.Module):
-    def __init__(self, hidden_size, embedding, n_layers=1, dropout=0,  game_state=False, history=False, delta_time=False, bidirectional=False, game_dim=8, game_only=False):
+    def __init__(self, hidden_size, embedding, n_layers=1, dropout=0.1,  game_state=False, history=False, delta_time=False, bidirectional=False, game_dim=8, game_only=False):
         super(EncoderRNN, self).__init__()
 
         # Parameters
@@ -156,7 +156,6 @@ class DecoderRNN(nn.Module):
 
         # Layers
         self.embedding = embedding
-        self.embedding_dropout = nn.Dropout(dropout)
         self.gru = nn.GRU(hidden_size, hidden_size, n_layers,
                           dropout=(0 if n_layers == 1 else dropout))
         self.fc = nn.Linear(hidden_size, output_size)
@@ -165,7 +164,6 @@ class DecoderRNN(nn.Module):
 
         # Get embedding of current input word
         embedded = self.embedding(input_step)
-        # embedded = self.embedding_dropout(embedded)
 
         # Forward through GRU
         rnn_output, hidden = self.gru(embedded, last_hidden)

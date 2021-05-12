@@ -120,8 +120,6 @@ print(decoder)
 train_dataset, validation_dataset, test_dataset, test_snakes, test_ladders, test_win = format_input(voc, use_dialogue_history, use_game_state, use_delta_time,
                                                                                                     game_only, max_len_game_seq, game_dim)
 
-print(len(train_dataset)+len(validation_dataset)+len(test_dataset) +
-      len(test_snakes)+len(test_ladders)+len(test_win))
 train_dataloader = DataLoader(
     train_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
 valid_dataloader = DataLoader(
