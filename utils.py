@@ -104,27 +104,35 @@ def outputVar(l, voc):
 
 
 def batch2TrainData(voc, pair_batch):
+    """
+    Creates the needed tensors for training, i.e. input, target, mask, length 
+    """
     # pair_batch.sort(key=lambda x: len(x[0].split(" ")), reverse=True)
     # print(pair_batch)
     input_batch, output_batch = [], []
     for pair in pair_batch:
-        # print(pair)
         input_batch.append(pair[0])
-        # print(input_batch)
         output_batch.append(pair[1])
-        # print(output_batch)
     inp, lengths = inputVar(input_batch, voc)
     output, mask, max_target_len = outputVar(output_batch, voc)
     return inp, lengths, output, mask, max_target_len
 
 
 def teacher_decay(epoch, n_epochs, end_factor=0.7, e_min=0, e_max=1):
+    """
+    Controls the teacher forcing decay, 
+    end_factor determines at what percentage of training the teacher forcing probability is 0
+    """
     slope = 1/(n_epochs*end_factor)
     epsilon = max(e_min, e_max-slope*epoch)
     return epsilon
 
 
 def tsne_plot(voc, embedding, embedding_size, save=True):
+    """
+    Plots the tsane figures for the word embeddings and gives nearest neighbours for 
+    snake, snakes, ladder, ladders, luck, yeah, game 
+    """
 
     n_neighbors = 3
     most_common = 200
@@ -181,6 +189,9 @@ def tsne_plot(voc, embedding, embedding_size, save=True):
 
 
 def remove_specific_samples(text_set, idx_list, game_set=None, delta_set=None, history=True):
+    """
+    Helper function used by the format_input function bellow
+    """
 
     if history:
         n_removed = 4
@@ -218,19 +229,17 @@ def remove_specific_samples(text_set, idx_list, game_set=None, delta_set=None, h
 
 
 def create_tensor_dataset(voc, text_data, game_data, delta_data):
+    """
+    Helper function used by the format_input function bellow
+    """
+
     text_data = batch2TrainData(voc, text_data)
     text_input, input_lengths, targets, mask, target_lengths = text_data
 
-    # Convert to tensors with same dim(0)
-    # print(game_data)
-    # print(delta_data)
     text_input = text_input.permute(1, 0)
     targets = targets.permute(1, 0)
     mask = mask.permute(1, 0)
-    # print(targets.shape)
-    # print(mask.shape)
-    # print(target_lengths.shape)
-    # print(game_input.shape)
+
     if game_data is not None and delta_data is not None:
         game_input = torch.tensor(game_data, dtype=torch.float)
         delta_input = torch.tensor(delta_data, dtype=torch.float)
@@ -254,6 +263,10 @@ def create_tensor_dataset(voc, text_data, game_data, delta_data):
 
 
 def reshape_text_input(input_variable, target_variable, mask, target_len):
+    """
+    Reshapes the tensors for the forward pass through the GRU
+    """
+
     input_variable = input_variable.permute(1, 0)
     target_variable = target_variable.permute(1, 0)
     mask = mask.permute(1, 0)
@@ -262,6 +275,9 @@ def reshape_text_input(input_variable, target_variable, mask, target_len):
 
 
 def format_input(voc, use_history, use_game_state, use_delta_time, game_only, max_len_game_seq, game_dim):
+    """
+    Creates a custom dataste based on the input modalities chosen. Also removes some specific samples from thew dataset for testing. 
+    """
 
     DIALOGUE_DIR = "dialogue_datasets/"
 

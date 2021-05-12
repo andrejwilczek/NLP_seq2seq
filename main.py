@@ -20,7 +20,7 @@ device = torch.device("cuda" if USE_CUDA else "cpu")
 voc = Vocab(make_embeddings=False)
 
 #################################
-#! Configure data structure
+# Configure data structure
 #################################
 use_dialogue_history = False
 use_game_state = False
@@ -28,7 +28,7 @@ use_delta_time = False
 game_only = False
 
 #################################
-#! Configure models
+# Configure models
 #################################
 hidden_size = 128
 encoder_n_layers = 1
@@ -36,20 +36,20 @@ decoder_n_layers = 1
 dropout = 0
 batch_size = 10
 load_embeddings = False
-bi_directional = True
+bi_directional = False
 
 #################################
-#! Configure training/optimization
+# Configure training/optimization
 #################################
 clip = 5.0
 learning_rate = 0.001
 decoder_learning_ratio = 1.0
-n_epochs = 10
+n_epochs = 20
 use_teacher_decay = False
 teacher_forcing_ratio = 0
 
 #################################
-#! Configure Evaluation
+# Configure Evaluation
 #################################
 evaluate_on_test = True
 n_eval = 10
@@ -119,6 +119,9 @@ print(decoder)
 # Create dataloaders
 train_dataset, validation_dataset, test_dataset, test_snakes, test_ladders, test_win = format_input(voc, use_dialogue_history, use_game_state, use_delta_time,
                                                                                                     game_only, max_len_game_seq, game_dim)
+
+print(len(train_dataset)+len(validation_dataset)+len(test_dataset) +
+      len(test_snakes)+len(test_ladders)+len(test_win))
 train_dataloader = DataLoader(
     train_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
 valid_dataloader = DataLoader(
