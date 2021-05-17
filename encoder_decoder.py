@@ -173,7 +173,12 @@ class DecoderRNN(nn.Module):
         output = self.fc(rnn_output)
 
         # Forward through softmax for prediction
-        output = F.softmax(output, dim=1)
+
+        # use this with maskNLLLoss() function
+        # output = F.softmax(output, dim=1)
+
+        # use this with NLLLoss()
+        output = F.log_softmax(output, dim=1)
 
         # Return output and final hidden state
         return output, hidden
@@ -234,6 +239,7 @@ class GreedySearchDecoder(nn.Module):
 
 
 def maskNLLLoss(inp, target, mask):
+
     nTotal = mask.sum()
     NLL = - \
         torch.log(torch.gather(inp, 1, target.view(-1, 1)).squeeze(1))
@@ -269,6 +275,7 @@ def train(input_variable, lengths, target_variable, mask, max_target_len,  encod
 
     # Initialize variables
     loss = 0
+    loss_layer = nn.NLLLoss(ignore_index=0)
     print_losses = []
     n_totals = 0
 
@@ -288,16 +295,16 @@ def train(input_variable, lengths, target_variable, mask, max_target_len,  encod
     else:
         encoder_outputs, encoder_hidden = encoder(input_variable, lengths)
 
+    # Decoder input is the first token in target (Player start token)
     decoder_input = target_variable[0, :]
     decoder_input = decoder_input.unsqueeze(0)
-
     decoder_input = decoder_input.to(device)
 
     # Set initial decoder hidden state to the encoder's final hidden state
     decoder_hidden = encoder_hidden[:decoder.n_layers]
 
     # Forward batch of sequences through decoder one time step at a time
-    for t in range(max_target_len):
+    for t in range(max_target_len-1):
         use_teacher_forcing = True if random.random() < teacher_forcing_ratio else False
         if use_teacher_forcing:
             decoder_output, decoder_hidden = decoder(
@@ -307,8 +314,14 @@ def train(input_variable, lengths, target_variable, mask, max_target_len,  encod
             decoder_input = target_variable[t].view(1, -1)
 
             # Calculate and accumulate loss
-            mask_loss, nTotal = maskNLLLoss(
-                decoder_output, target_variable[t], mask[t])
+            # NLLLoss()
+            mask_loss = loss_layer(decoder_output, target_variable[t+1])
+            nTotal = mask.sum().item()
+
+            # maskNLLLoss()
+            # mask_loss, nTotal = maskNLLLoss(
+            #     decoder_output, target_variable[t], mask[t])
+
             loss += mask_loss
             print_losses.append(mask_loss.item() * nTotal)
             n_totals += nTotal
@@ -323,12 +336,21 @@ def train(input_variable, lengths, target_variable, mask, max_target_len,  encod
             decoder_input = decoder_input.to(device)
 
             # Calculate and accumulate loss
-            mask_loss, nTotal = maskNLLLoss(
-                decoder_output, target_variable[t], mask[t])
+            # NLLLoss()
+            # print(decoder_output)
+            # print(target_variable[t+1])
+            # print(target_variable[t])
+            mask_loss = loss_layer(decoder_output, target_variable[t+1])
+            nTotal = mask.sum().item()
+            # maskNLLLoss()
+            # mask_loss, nTotal = maskNLLLoss(
+            #     decoder_output, target_variable[t], mask[t])
+
             loss += mask_loss
             print_losses.append(mask_loss.item() * nTotal)
             n_totals += nTotal
 
+    # quit()
     # Perform backpropatation
     loss.backward()
 
@@ -487,6 +509,7 @@ def validation(input_variable, lengths, target_variable, mask, max_target_len, e
 
         # Initialize variables
         loss = 0
+        loss_layer = nn.NLLLoss(ignore_index=0)
         print_losses = []
         n_totals = 0
 
@@ -512,7 +535,7 @@ def validation(input_variable, lengths, target_variable, mask, max_target_len, e
         # Set initial decoder hidden state to the encoder's final hidden state
         decoder_hidden = encoder_hidden[:decoder.n_layers]
 
-        for t in range(max_target_len):
+        for t in range(max_target_len-1):
             decoder_output, decoder_hidden = decoder(
                 decoder_input, decoder_hidden, encoder_outputs)
 
@@ -523,8 +546,11 @@ def validation(input_variable, lengths, target_variable, mask, max_target_len, e
             decoder_input = decoder_input.to(device)
 
             # Calculate and accumulate loss
-            mask_loss, nTotal = maskNLLLoss(
-                decoder_output, target_variable[t], mask[t])
+            mask_loss = loss_layer(decoder_output, target_variable[t+1])
+            nTotal = mask.sum()
+
+            # mask_loss, nTotal = maskNLLLoss(
+            #     decoder_output, target_variable[t], mask[t])
             loss += mask_loss
             print_losses.append(mask_loss.item() * nTotal)
             n_totals += nTotal
@@ -540,8 +566,10 @@ def evaluateTestset(encoder, decoder, searcher, voc, test_dataloader, n_eval=10,
 
     for _ in range(n_eval):
 
+        # Get next test sample
         test_sample = next(iter(test_dataloader))
 
+        # Extract correct input
         if encoder.use_game_state and encoder.use_delta_time:
             input_variable, lengths, target_variable, mask, target_len, game_state, delta = test_sample
             game_state = game_state.permute(1, 0, 2)
@@ -561,6 +589,7 @@ def evaluateTestset(encoder, decoder, searcher, voc, test_dataloader, n_eval=10,
             input_variable, target_variable, mask, target_len = reshape_text_input(
                 input_variable, target_variable, mask, target_len)
 
+        # Convert to text tokens for printing
         input_tokens = [item for sublist in input_variable.tolist()
                         for item in sublist]
         target_tokens = [item for sublist in target_variable.tolist()
@@ -572,8 +601,8 @@ def evaluateTestset(encoder, decoder, searcher, voc, test_dataloader, n_eval=10,
         input_sentence = ' '.join(input_sentence)
         target_sentence = ' '.join(target_sentence)
 
+        # Print the input/output dialogue and game state
         print('Input: ', input_sentence)
-
         if encoder.use_game_state:
             final_gamestate = list()
             last_gamestate = game_state[-1].tolist()[0]
@@ -581,13 +610,12 @@ def evaluateTestset(encoder, decoder, searcher, voc, test_dataloader, n_eval=10,
                 final_gamestate.append(round(feature*norm[i]))
                 game_state = game_state.to(device)
             print('Last game state: ', final_gamestate)
-
         print('Target: ', target_sentence)
 
+        # Send to device
         input_variable = input_variable.to(device)
         lengths = lengths.to(device)
         target_variable = target_variable.to(device)
-
         if encoder.use_delta_time:
             delta = delta.to(device)
 
@@ -605,9 +633,16 @@ def evaluateTestset(encoder, decoder, searcher, voc, test_dataloader, n_eval=10,
             tokens, scores = searcher(
                 input_variable, lengths, max_length, target_variable)
 
-        for i, token in enumerate(tokens):
+        first = True
 
+        # Iterate through predicted tokens and print
+        for i, token in enumerate(tokens):
+            # If furhats dialogue
             if voc.index2word[target_variable[0].item()] == 'F':
+                if first:
+                    decoded_words.append('F')
+                    first = False
+                # If stop token is predicted or max_len reached, break
                 if voc.index2word[token.item()] == '/F' or i == len(tokens)-1:
                     decoded_words.append('/F')
                     print('Predicted: ', ' '.join(decoded_words), '\n')
@@ -615,8 +650,12 @@ def evaluateTestset(encoder, decoder, searcher, voc, test_dataloader, n_eval=10,
                     break
                 else:
                     decoded_words.append(voc.index2word[token.item()])
-
+            # If humans dialogue
             else:
+                if first:
+                    decoded_words.append('H')
+                    first = False
+                # If stop token is predicted or max_len reached, break
                 if voc.index2word[token.item()] == '/H' or i == len(tokens)-1:
                     decoded_words.append('/H')
                     print('Predicted: ', ' '.join(decoded_words), '\n')
@@ -695,9 +734,13 @@ def specific_eval(encoder, decoder, searcher, voc, test_cases,  max_length=50):
             tokens, scores = searcher(
                 input_variable, lengths, max_length, target_variable)
 
+        first = True
         for i, token in enumerate(tokens):
 
             if voc.index2word[target_variable[0].item()] == 'F':
+                if first:
+                    decoded_words.append('F')
+                    first = False
                 if voc.index2word[token.item()] == '/F' or i == len(tokens)-1:
                     decoded_words.append('/F')
                     print('Predicted: ', ' '.join(decoded_words), '\n')
@@ -707,6 +750,9 @@ def specific_eval(encoder, decoder, searcher, voc, test_cases,  max_length=50):
                     decoded_words.append(voc.index2word[token.item()])
 
             else:
+                if first:
+                    decoded_words.append('H')
+                    first = False
                 if voc.index2word[token.item()] == '/H' or i == len(tokens)-1:
                     decoded_words.append('/H')
                     print('Predicted: ', ' '.join(decoded_words), '\n')

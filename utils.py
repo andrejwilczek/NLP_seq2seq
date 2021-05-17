@@ -60,18 +60,30 @@ def plotLoss(train_loss, valid_loss, n_iterations, save=False):
 
 
 def remove_all_extra_spaces(string):
+    """
+    Removes extraspaces from string
+    """
     return " ".join(string.split())
 
 
 def indexesFromSentence(voc, sentence):
+    """
+    Gets token ids from sentence
+    """
     return [voc.word2index[word] if word in voc.word2index else UNK_token for word in sentence.split(' ')]
 
 
 def zeroPadding(l, fillvalue=PAD_token):
+    """
+    Pads sequence with zeros
+    """
     return list(itertools.zip_longest(*l, fillvalue=fillvalue))
 
 
 def binaryMatrix(l, value=PAD_token):
+    """
+    Creates mask
+    """
     matrix = []
     for i, seq in enumerate(l):
         matrix.append([])
@@ -84,6 +96,9 @@ def binaryMatrix(l, value=PAD_token):
 
 
 def inputVar(l, voc):
+    """
+    Pads the input variable and creates tensor with the sequence lengths
+    """
     indexes_batch = [indexesFromSentence(voc, sentence) for sentence in l]
     lengths = torch.tensor([len(indexes) for indexes in indexes_batch])
     padList = zeroPadding(indexes_batch)
@@ -92,8 +107,10 @@ def inputVar(l, voc):
 
 
 def outputVar(l, voc):
+    """
+    Pads the output variable and creates mask tensor and max len
+    """
     indexes_batch = [indexesFromSentence(voc, sentence) for sentence in l]
-    # max_target_len = max([len(indexes) for indexes in indexes_batch])
     max_target_len = [len(indexes) for indexes in indexes_batch]
     padList = zeroPadding(indexes_batch)
     mask = binaryMatrix(padList)
@@ -105,10 +122,8 @@ def outputVar(l, voc):
 
 def batch2TrainData(voc, pair_batch):
     """
-    Creates the needed tensors for training, i.e. input, target, mask, length 
+    Creates the needed tensors for training, i.e. input, target, mask, length
     """
-    # pair_batch.sort(key=lambda x: len(x[0].split(" ")), reverse=True)
-    # print(pair_batch)
     input_batch, output_batch = [], []
     for pair in pair_batch:
         input_batch.append(pair[0])
@@ -120,7 +135,7 @@ def batch2TrainData(voc, pair_batch):
 
 def teacher_decay(epoch, n_epochs, end_factor=0.7, e_min=0, e_max=1):
     """
-    Controls the teacher forcing decay, 
+    Controls the teacher forcing decay,
     end_factor determines at what percentage of training the teacher forcing probability is 0
     """
     slope = 1/(n_epochs*end_factor)
@@ -130,8 +145,8 @@ def teacher_decay(epoch, n_epochs, end_factor=0.7, e_min=0, e_max=1):
 
 def tsne_plot(voc, embedding, embedding_size, save=True):
     """
-    Plots the tsane figures for the word embeddings and gives nearest neighbours for 
-    snake, snakes, ladder, ladders, luck, yeah, game 
+    Plots the tsane figures for the word embeddings and gives nearest neighbours for
+    snake, snakes, ladder, ladders, luck, yeah, game
     """
 
     n_neighbors = 3
@@ -276,7 +291,7 @@ def reshape_text_input(input_variable, target_variable, mask, target_len):
 
 def format_input(voc, use_history, use_game_state, use_delta_time, game_only, max_len_game_seq, game_dim):
     """
-    Creates a custom dataste based on the input modalities chosen. Also removes some specific samples from thew dataset for testing. 
+    Creates a custom dataste based on the input modalities chosen. Also removes some specific samples from thew dataset for testing.
     """
 
     DIALOGUE_DIR = "dialogue_datasets/"

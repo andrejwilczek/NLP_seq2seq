@@ -58,7 +58,7 @@ def parse_game_state():
 
    # Training set
     for i, name in enumerate(text_file_names):
-        print('suncing gamestate for participant: ', name)
+        print('syncing gamestate for participant: ', name)
         synced_game = sync_game_state(text[i], game_states[i], zero_dim)
         if len(synced_game[-1]) > max_length:
             max_length = len(synced_game[-1])

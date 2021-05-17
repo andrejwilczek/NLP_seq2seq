@@ -15,6 +15,11 @@ warnings.filterwarnings("ignore")
 USE_CUDA = torch.cuda.is_available()
 device = torch.device("cuda" if USE_CUDA else "cpu")
 
+# Random seed
+RANDOM_SEED = 42
+np.random.seed(RANDOM_SEED)
+torch.manual_seed(RANDOM_SEED)
+random.seed(RANDOM_SEED)
 
 # Init the vocab class, set make_embedings to True if you have no saved glove embeddings for the dataset
 voc = Vocab(make_embeddings=False)
@@ -30,7 +35,7 @@ game_only = False
 #################################
 # Configure models
 #################################
-hidden_size = 128
+hidden_size = 50
 encoder_n_layers = 1
 decoder_n_layers = 1
 dropout = 0
@@ -44,7 +49,7 @@ bi_directional = False
 clip = 5.0
 learning_rate = 0.001
 decoder_learning_ratio = 1.0
-n_epochs = 20
+n_epochs = 150
 use_teacher_decay = False
 teacher_forcing_ratio = 0
 
@@ -82,7 +87,7 @@ plot_embeddings = False
 
 max_len_game_seq = 599
 game_dim = 8
-# Failsafe if poorly configured data structure
+# Failsafe if poorly configured input data
 if game_only:
     use_game_state = True
     use_dialogue_history = False

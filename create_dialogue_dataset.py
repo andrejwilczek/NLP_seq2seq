@@ -2,7 +2,7 @@ import pandas as pd
 import os
 
 
-def create_subset(sentences, history):
+def create_subset(sentences, history, eos_tag):
 
     dataset = list()
     three_prev_sentence = 'EOS '
@@ -10,30 +10,56 @@ def create_subset(sentences, history):
     prev_sentence = 'EOS '
 
     if history:
-        for sentence in sentences:
-            sentence = sentence.replace(".", " . EOS").replace(
-                ",", " , ").replace("?", " ? EOS").replace("!", " ! EOS")
+        if eos_tag:
+            for sentence in sentences:
+                sentence = sentence.replace(".", " . EOS").replace(
+                    ",", " , ").replace("?", " ? EOS").replace("!", " ! EOS")
 
-            input_seq = three_prev_sentence + \
-                two_prev_sentence + prev_sentence
-            target_seq = sentence
+                input_seq = three_prev_sentence + \
+                    two_prev_sentence + prev_sentence
+                target_seq = sentence
 
-            input_seq = " ".join(input_seq.split())
-            target_seq = " ".join(target_seq.split())
+                input_seq = " ".join(input_seq.split())
+                target_seq = " ".join(target_seq.split())
 
-            dataset.append([input_seq, target_seq])
-            three_prev_sentence = two_prev_sentence
-            two_prev_sentence = prev_sentence
-            prev_sentence = sentence
+                dataset.append([input_seq, target_seq])
+                three_prev_sentence = two_prev_sentence
+                two_prev_sentence = prev_sentence
+                prev_sentence = sentence
+        else:
+            for sentence in sentences:
+                sentence = sentence.replace(".", " . ").replace(
+                    ",", " , ").replace("?", " ? ").replace("!", " ! ")
+
+                input_seq = three_prev_sentence + \
+                    two_prev_sentence + prev_sentence
+                target_seq = sentence
+
+                input_seq = " ".join(input_seq.split())
+                target_seq = " ".join(target_seq.split())
+
+                dataset.append([input_seq, target_seq])
+                three_prev_sentence = two_prev_sentence
+                two_prev_sentence = prev_sentence
+                prev_sentence = sentence
     else:
-        for sentence in sentences:
-            sentence = sentence.replace(".", " . EOS").replace(
-                ",", " ,").replace("?", " ? EOS").replace("!", " ! EOS")
-            sentence = " ".join(sentence.split())
+        if eos_tag:
+            for sentence in sentences:
+                sentence = sentence.replace(".", " . EOS").replace(
+                    ",", " ,").replace("?", " ? EOS").replace("!", " ! EOS")
+                sentence = " ".join(sentence.split())
 
-            dataset.append([prev_sentence, sentence])
-            prev_sentence = sentence
+                dataset.append([prev_sentence, sentence])
+                prev_sentence = sentence
 
+        else:
+            for sentence in sentences:
+                sentence = sentence.replace(".", " . ").replace(
+                    ",", " ,").replace("?", " ? ").replace("!", " ! ")
+                sentence = " ".join(sentence.split())
+
+                dataset.append([prev_sentence, sentence])
+                prev_sentence = sentence
     return dataset
 
 
@@ -64,7 +90,7 @@ def create_deltas(times, history):
     return deltas
 
 
-def create_dialogue_dataset(file_names, history, load_dir, save_dir):
+def create_dialogue_dataset(file_names, history, load_dir, save_dir, eos_tag):
 
     full_dataset = list()
     full_deltas = list()
@@ -73,7 +99,7 @@ def create_dialogue_dataset(file_names, history, load_dir, save_dir):
         df_all = pd.read_csv(load_dir+path)
         sentences = df_all['Dialogue']
         times = df_all['Time']
-        all_data = create_subset(sentences, history)
+        all_data = create_subset(sentences, history, eos_tag)
         delta_time = create_deltas(times, history)
         full_deltas.extend(delta_time)
         full_dataset.extend(all_data)
@@ -111,7 +137,7 @@ def create_dialogue_dataset(file_names, history, load_dir, save_dir):
             df_all.to_csv(save_dir+'dialogue.csv', index=False, header=True)
 
 
-def parse_dialogue(history):
+def parse_dialogue(history, eos_tag):
 
     # File names
     file_names = ['Daniel.csv', 'Jenny.csv', 'Julia.csv', 'Lukas.csv', 'Max.csv',
@@ -122,6 +148,8 @@ def parse_dialogue(history):
     load_dir = 'dialogue_clean/'
 
     if history:
-        create_dialogue_dataset(file_names, history, load_dir, save_dir)
+        create_dialogue_dataset(file_names, history,
+                                load_dir, save_dir, eos_tag)
     else:
-        create_dialogue_dataset(file_names, history, load_dir, save_dir)
+        create_dialogue_dataset(file_names, history,
+                                load_dir, save_dir, eos_tag)

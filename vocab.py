@@ -15,6 +15,7 @@ UNK_token = 6  # Out of vocabulary token
 
 class Vocab():
     def __init__(self, make_embeddings=False):
+        # Word dicts
         self.word2index = {"PAD": PAD_token, 'F': FURHAT_start, '/F': FURHAT_stop,
                            'H': HUMAN_start, '/H': HUMAN_stop, "EOS": EOS_token, "UNK": UNK_token}
         self.word2count = {"PAD": 0, "F": 0, "/F": 0,
